@@ -54,8 +54,18 @@ USER root
 
 
 RUN pip install s3cmd --user
-ENV rna_seq 0.18
 WORKDIR ${HOME}
-RUN git clone https://github.com/NCI-GDC/htseq-tool.git
-WORKDIR ${HOME}/bin
+ADD htseq-tool ${HOME}/bin/htseq-tool/
+ADD setup.* ${HOME}/bin/htseq-tool/
+
+ENV rna_seq 0.18
+
+RUN pip install --user virtualenvwrapper \
+    && /bin/bash -c "source ${HOME}/.local/bin/virtualenvwrapper.sh \
+    && mkvirtualenv --python=/usr/bin/python3 p3 \
+    && source ~/.virtualenvs/p3/bin/activate \
+    && cd ~/bin/htseq-tool \
+    && pip install -e ."
+
+WORKDIR ${HOME}
 
