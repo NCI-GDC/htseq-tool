@@ -3,7 +3,7 @@ import setuptools
 setuptools.setup(
         name = "htseq-tool",
         author = "Stuti Agrawal",
-        author_email = "stutia@uchicago.edu"
+        author_email = "stutia@uchicago.edu",
         version = 0.1,
         description = "rna-seq quantification tools",
         url = "https://github.com/NCI-GDC/htseq-tool",
