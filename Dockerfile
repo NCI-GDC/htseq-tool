@@ -40,6 +40,7 @@ RUN wget https://pypi.python.org/packages/source/H/HTSeq/HTSeq-0.6.1p1.tar.gz &&
 USER root
 WORKDIR ${HOME}/bin/HTSeq
 RUN python setup.py build install
+RUN sed -i 's/read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq )/read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq, max_buffer_size=100000000 )/' /usr/local/lib/python2.7/dist-packages/HTSeq-0.6.1p1-py2.7-linux-x86_64.egg/HTSeq/scripts/count.py
 WORKDIR ${HOME}/bin
 
 #download SAMTOOLS
