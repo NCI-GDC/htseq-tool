@@ -16,7 +16,7 @@ def htseq_count(bam, analysis_id, annotation, outdir, logger, strand="no"):
 	    #sorted_bam = "%s.sorted.bam" %bam
         #sort_cmd = ["time", "samtools", "sort", "-n", "-o", sorted_bam, "-T", tmp, bam]
 
-	    mapped_cmd = ["time", "samtools", "view", "-F", "4", bam]
+        mapped_cmd = ["time", "samtools", "view", "-F", "4", bam]
         count_cmd = ["time", "htseq-count", "-m", "intersection-nonempty", "--idattr",
                     "gene_id", "-r", "pos", "--stranded", strand, "-", annotation]
 
