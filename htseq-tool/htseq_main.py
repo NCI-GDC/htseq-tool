@@ -48,7 +48,7 @@ if __name__=="__main__":
        	#pipelineUtil.upload_to_cleversafe(logger, os.path.join(args.tobucket, "htseq-logs/"),
         #                                 log_file, args.s3cfg)
 
-        fpkm_file, fpkm_uq_file = fpkm.get_fpkm_files(out_file_name, args.genome_annotation, args.outdir, args.id)
+        fpkm.get_fpkm_files(out_file_name, args.genome_annotation, args.outdir, args.id)
 
        	#pipelineUtil.upload_to_cleversafe(logger, os.path.join(args.tobucket, "htseq-fpkm/"),
         #                                 fpkm_file, args.s3cfg)
