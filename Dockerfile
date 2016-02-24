@@ -63,11 +63,13 @@ ENV rna_seq 0.18
 RUN pip install --user virtualenvwrapper \
     && /bin/bash -c "source ${HOME}/.local/bin/virtualenvwrapper.sh \
     && mkvirtualenv --python=/usr/bin/python3 p3 \
+    && echo source ${HOME}/.local/bin/virtualenvwrapper.sh >>${HOME}/.bashrc \
+    && echo source ${HOME}/.virtualenvs/p3/bin/activate >> ${HOME}/.bashrc \
     && source ~/.virtualenvs/p3/bin/activate \
     && cd ~/bin/htseq-tool \
-    && pip install -e ."
+    && pip install -r ./requirements.txt"
 
-RUN chown ubuntu:ubuntu ${HOME}/bin/htseq-tool
+RUN chown -R ubuntu:ubuntu ${HOME}/bin/htseq-tool
 USER ubuntu
 WORKDIR ${HOME}
 

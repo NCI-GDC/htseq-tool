@@ -17,5 +17,9 @@ setuptools.setup(
             "Programming Language :: Python :: 2",
             "Programming Language :: Python :: 3",
             ],
+        install_requries = [
+            'sqlalchemy',
+            'psycopg2'
+            ]
     )
 
