@@ -3,7 +3,6 @@ import os
 import setupLog
 import htseq
 import argparse
-import pipelineUtil
 import fpkm
 from cdis_pipe_utils import postgres
 
