@@ -38,6 +38,7 @@ def get_protein_coding_read_count(pcgenes, counts_file):
     """
 
     read_count = dict()
+    pcreads = dict()
     protein_coding_reads = 0
 
     rc = open(counts_file, "r")
@@ -51,9 +52,10 @@ def get_protein_coding_read_count(pcgenes, counts_file):
     for gene in pcgenes:
         if gene in read_count:
             protein_coding_reads += read_count[gene]
+            pcreads[gene] = read_count[gene]
 
     rc.close()
-    return protein_coding_reads, read_count
+    return protein_coding_reads, read_count, pcreads
 
 def get_gene_length(fname):
     """ get gene length from file """
@@ -73,7 +75,7 @@ def get_gene_length(fname):
 
     return gene_length
 
-def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid, logger):
+def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, pcreads, outdir, uuid, logger):
 
     """
     calculates the FPKM and FPKM-UQ
@@ -90,8 +92,8 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid,
     if not (len(all_gene_length) == len(all_read_count) - 5):
         raise Exception ("Unequal length and counts of genes")
 
-    all_reads = numpy.array(all_read_count.values())
-    upper_quantile = numpy.percentile(all_reads, 75)
+    all_pc_reads = numpy.array(pcreads.values())
+    upper_quantile = numpy.percentile(all_pc_reads, 75)
 
     for gene in all_gene_length:
         if not gene in all_read_count:
@@ -104,12 +106,12 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid,
         fpkm.write("%s\t%s\n" %(gene, FPKM))
 
         if(upper_quantile == 0):
-             logger.error("The upper quantile value for all reads or length of gene %s is zero. Assigning a very small value of 0.1^9" %gene)
-             upper_quantile = pow(0.1, 9)
+             logger.error("The upper quantile value for all protein coding reads is 0")
+             raise Exception("The upper quantile for all protein coding reads is 0")
 
         if(L == 0):
-            logger.error("The length of gene %s is zero. Assigning a very small value of 0.1^9" %gene)
-            L = pow(0.1, 9)
+            logger.error("The length of gene %s is zero." %gene)
+            raise Exception("The length of gene %s is zero." %gene)
 
         FPKM_UQ = (C * pow(10.0, 9)) / (upper_quantile * L)
         fpkm_uq.write("%s\t%s\n" %(gene, FPKM_UQ))
@@ -121,6 +123,6 @@ def get_fpkm_files(counts_file, gtf, outdir, uuid, genelens, logger):
 
     pcgenes = protein_coding(gtf, outdir)
     gene_length = get_gene_length(genelens)
-    pc_frag_count, read_count = get_protein_coding_read_count(pcgenes, counts_file)
-    calculate_fpkm(read_count, pc_frag_count, gene_length, outdir, uuid, logger)
+    pc_frag_count, read_count, pcreads = get_protein_coding_read_count(pcgenes, counts_file)
+    calculate_fpkm(read_count, pc_frag_count, gene_length, pcreads, outdir, uuid, logger)
 
