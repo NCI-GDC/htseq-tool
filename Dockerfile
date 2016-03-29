@@ -28,6 +28,9 @@ RUN apt-get update && apt-get install -y --force-yes \
     python-virtualenv \
     default-jre \
     default-jdk
+    build-essential \ 
+    cmake \
+    libncurses-dev 
 
 RUN adduser --disabled-password --gecos '' ubuntu && adduser ubuntu sudo && echo "ubuntu    ALL=(ALL)   NOPASSWD:ALL" >> /etc/sudoers.d/ubuntu
 ENV HOME /home/ubuntu
@@ -57,6 +60,7 @@ RUN pip install s3cmd --user
 WORKDIR ${HOME}
 ADD htseq-tool ${HOME}/bin/htseq-tool/
 ADD setup.* ${HOME}/bin/htseq-tool/
+ADD requirements.txt ${HOME}/bin/htseq-tool/
 
 ENV rna_seq 0.18
 
