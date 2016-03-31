@@ -24,7 +24,7 @@ if __name__=="__main__":
     optional = parser.add_argument_group("optional input parameters")
     optional.add_argument("--id", default="unknown", help="unique identifer")
     optional.add_argument("--strand", default="no", help="strand specificity of experimental library")
-    optional.add_argument("--gene_lengths", default="/home/ubuntu/bin/htseq-tool/expression_normalization/gene_length.txt", help="file for gene lengths")
+    optional.add_argument("--gene_lengths", default="/home/ubuntu/bin/htseq-tool/gencode.v22.gene.length.txt", help="file for gene lengths")
 
     database = parser.add_argument_group("database paramters")
     database.add_argument("--record_metrics", default=0, help="record metrics for runs")
