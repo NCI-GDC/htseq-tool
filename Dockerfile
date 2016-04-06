@@ -63,6 +63,7 @@ WORKDIR ${HOME}
 ADD htseq-tool ${HOME}/bin/htseq-tool/
 ADD setup.* ${HOME}/bin/htseq-tool/
 ADD requirements.txt ${HOME}/bin/htseq-tool/
+ADD expression_normalization ${HOME}/bin/htseq-tool
 
 ENV rna_seq 0.18
 
@@ -77,7 +78,6 @@ RUN pip install --user virtualenvwrapper \
 
 RUN chown -R ubuntu:ubuntu ${HOME}/bin/htseq-tool
 
-ADD expression_normalization ${HOME}/bin/htseq-tool
 USER ubuntu
 WORKDIR ${HOME}
 
