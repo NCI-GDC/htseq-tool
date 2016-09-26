@@ -4,9 +4,7 @@ import numpy
 def protein_coding(gtf, outdir):
 
     """
-    gets
-    (a) names of protein coding genes from the annotation file
-    (b) gene length of all the genes.
+    gets names of protein coding genes from the annotation file
     """
 
     annotation = open(gtf, "r")
@@ -15,7 +13,6 @@ def protein_coding(gtf, outdir):
     for i in xrange(5):
         annotation.readline()
 
-    gene_length = dict()
     protein_coding = set()
 
     for line in annotation:
@@ -25,18 +22,13 @@ def protein_coding(gtf, outdir):
         end = line[4] #ending location of element on chromosome
 
         if (elem_type == "gene"):
-            chunks = line[-1].split("\"")
-            assert("gene_id" in chunks[0])
-            gene_id = chunks[1]
-            if("gene_type \"protein_coding\"" in line[-1]):
+            gene_id = line[-1].split("\"")[1]
+            if("gene_type \"protein_coding\"" in line[len(line) - 1]):
                 protein_coding.add(gene_id)
-
-            length = int(end) - int(start) + 1
-            gene_length[gene_id] = length
 
 
     annotation.close()
-    return(protein_coding, gene_length)
+    return protein_coding
 
 def get_protein_coding_read_count(pcgenes, counts_file):
 
@@ -46,6 +38,7 @@ def get_protein_coding_read_count(pcgenes, counts_file):
     """
 
     read_count = dict()
+    pcreads = dict()
     protein_coding_reads = 0
 
     rc = open(counts_file, "r")
@@ -59,11 +52,30 @@ def get_protein_coding_read_count(pcgenes, counts_file):
     for gene in pcgenes:
         if gene in read_count:
             protein_coding_reads += read_count[gene]
+            pcreads[gene] = read_count[gene]
 
     rc.close()
-    return protein_coding_reads, read_count
+    return protein_coding_reads, read_count, pcreads
 
-def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid):
+def get_gene_length(fname):
+    """ get gene length from file """
+
+    gene_length = dict()
+
+    f = open(fname, "r")
+    f.readline()
+
+    for line in f:
+        line = line.split("\t")
+        gene_id = line[0]
+        length = float(line[1])
+        if gene_id in gene_length:
+            raise Exception ("Entry for gene_id : %s already exists" % gene_id)
+        gene_length[gene_id] = length
+
+    return gene_length
+
+def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, pcreads, outdir, uuid, logger):
 
     """
     calculates the FPKM and FPKM-UQ
@@ -72,8 +84,6 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid)
     fpkm = open(os.path.join(outdir, "%s.FPKM.txt" %uuid), "w")
     fpkm_uq = open(os.path.join(outdir, "%s.FPKM-UQ.txt" %uuid), "w")
 
-    #print len(all_gene_length)
-    #print len(all_read_count)
 
     #quantification results are assigned to five more categories
     #these are "no_feature", "ambiguous", "too_low_aQual", "not_aligned" and "alignment_not_unique"
@@ -82,9 +92,8 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid)
     if not (len(all_gene_length) == len(all_read_count) - 5):
         raise Exception ("Unequal length and counts of genes")
 
-    all_reads = numpy.array(all_read_count.values())
-    upper_quantile = numpy.percentile(all_reads, 75)
-    #print upper_quantile
+    all_pc_reads = numpy.array(pcreads.values())
+    upper_quantile = numpy.percentile(all_pc_reads, 75)
 
     for gene in all_gene_length:
         if not gene in all_read_count:
@@ -96,8 +105,13 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid)
         FPKM = (C * pow(10.0, 9))/ (pc_frag_count * L)
         fpkm.write("%s\t%s\n" %(gene, FPKM))
 
-        if(upper_quantile == 0 or L == 0):
-            raise Exception ("The upper quantile value for all reads or length of gene %s is zero. Please check if the reads are mapped and try again" %gene)
+        if(upper_quantile == 0):
+             logger.error("The upper quantile value for all protein coding reads is 0")
+             raise Exception("The upper quantile for all protein coding reads is 0")
+
+        if(L == 0):
+            logger.error("The length of gene %s is zero." %gene)
+            raise Exception("The length of gene %s is zero." %gene)
 
         FPKM_UQ = (C * pow(10.0, 9)) / (upper_quantile * L)
         fpkm_uq.write("%s\t%s\n" %(gene, FPKM_UQ))
@@ -105,9 +119,10 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, outdir, uuid)
     fpkm.close()
     fpkm_uq.close()
 
-def get_fpkm_files(counts_file, gtf, outdir, uuid):
+def get_fpkm_files(counts_file, gtf, outdir, uuid, genelens, logger):
 
-    pcgenes, gene_length = protein_coding(gtf, outdir)
-    pc_frag_count, read_count = get_protein_coding_read_count(pcgenes, counts_file)
-    calculate_fpkm(read_count, pc_frag_count, gene_length, outdir, uuid)
+    pcgenes = protein_coding(gtf, outdir)
+    gene_length = get_gene_length(genelens)
+    pc_frag_count, read_count, pcreads = get_protein_coding_read_count(pcgenes, counts_file)
+    calculate_fpkm(read_count, pc_frag_count, gene_length, pcreads, outdir, uuid, logger)
 

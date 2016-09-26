@@ -27,7 +27,12 @@ RUN apt-get update && apt-get install -y --force-yes \
     wget \
     python-virtualenv \
     default-jre \
-    default-jdk
+    default-jdk \
+    build-essential \ 
+    cmake \
+    libncurses-dev 
+
+RUN apt-get build-dep -y --force-yes python-psycopg2
 
 RUN adduser --disabled-password --gecos '' ubuntu && adduser ubuntu sudo && echo "ubuntu    ALL=(ALL)   NOPASSWD:ALL" >> /etc/sudoers.d/ubuntu
 ENV HOME /home/ubuntu
@@ -57,17 +62,22 @@ RUN pip install s3cmd --user
 WORKDIR ${HOME}
 ADD htseq-tool ${HOME}/bin/htseq-tool/
 ADD setup.* ${HOME}/bin/htseq-tool/
+ADD requirements.txt ${HOME}/bin/htseq-tool/
+ADD expression_normalization ${HOME}/bin/htseq-tool
 
 ENV rna_seq 0.18
 
 RUN pip install --user virtualenvwrapper \
     && /bin/bash -c "source ${HOME}/.local/bin/virtualenvwrapper.sh \
-    && mkvirtualenv --python=/usr/bin/python3 p3 \
-    && source ~/.virtualenvs/p3/bin/activate \
+    && mkvirtualenv --python=/usr/bin/python2 p2 \
+    && echo source ${HOME}/.local/bin/virtualenvwrapper.sh >>${HOME}/.bashrc \
+    && echo source ${HOME}/.virtualenvs/p2/bin/activate >> ${HOME}/.bashrc \
+    && source ~/.virtualenvs/p2/bin/activate \
     && cd ~/bin/htseq-tool \
-    && pip install -e ."
+    && pip install -r ./requirements.txt"
 
-RUN chown ubuntu:ubuntu ${HOME}/bin/htseq-tool
+RUN chown -R ubuntu:ubuntu ${HOME}/bin/htseq-tool
+
 USER ubuntu
 WORKDIR ${HOME}
 
