@@ -1,83 +1,61 @@
-FROM ubuntu:14.04
-MAINTAINER Stuti Agrawal <stutia@uchicago.edu>
-USER root
+FROM ubuntu:16.04
+MAINTAINER Kyle Hernandez <kmhernan@uchicago.edu> 
+
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --force-yes \
-    curl \
-    g++ \
-    make \
-    python \
-    libboost-dev \
-    libboost-thread-dev \
-    libboost-system-dev \
-    zlib1g-dev \
-    ncurses-dev \
-    unzip \
-    gzip \
-    bzip2 \
-    libxml2-dev \
-    libxslt-dev \
-    python-pip \
-    python-dev \
-    python-numpy \
-    python-matplotlib \
-    git \
-    s3cmd \
-    time \
-    wget \
-    python-virtualenv \
-    default-jre \
-    default-jdk \
-    build-essential \ 
-    cmake \
-    libncurses-dev 
 
-RUN apt-get build-dep -y --force-yes python-psycopg2
+RUN apt-get update && apt-get install -y \
+        build-essential \
+        python \
+        python-pip \
+        python-dev \
+        python-numpy \
+        python-matplotlib \
+        wget \
+        zlib1g-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libncurses-dev \
+        bzip2 \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN adduser --disabled-password --gecos '' ubuntu && adduser ubuntu sudo && echo "ubuntu    ALL=(ALL)   NOPASSWD:ALL" >> /etc/sudoers.d/ubuntu
-ENV HOME /home/ubuntu
-USER ubuntu
-RUN mkdir ${HOME}/bin
-WORKDIR ${HOME}/bin
-
+# htslib
+WORKDIR /opt/
+RUN wget https://github.com/samtools/htslib/releases/download/1.8/htslib-1.8.tar.bz2 && \
+    tar -xjf htslib-1.8.tar.bz2 && \
+    cd htslib-1.8 && \
+    ./configure && \
+    make && \
+    make install && \
+    rm /opt/htslib-1.8.tar.bz2
+ 
+# samtool
+WORKDIR /opt/
+RUN wget https://github.com/samtools/samtools/releases/download/1.8/samtools-1.8.tar.bz2 && \
+    tar -xjf samtools-1.8.tar.bz2 && \
+    rm samtools-1.8.tar.bz2 && \
+    cd samtools-1.8 && \
+    make && make install
+ 
 #download HTSEQ
-RUN wget https://pypi.python.org/packages/source/H/HTSeq/HTSeq-0.6.1p1.tar.gz && tar xf HTSeq-0.6.1p1.tar.gz && mv HTSeq-0.6.1p1 HTSeq
-WORKDIR ${HOME}/bin/HTSeq
-USER root
-RUN python setup.py build install
-RUN sed -i 's/read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq )/read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq, max_buffer_size=100000000 )/' /usr/local/lib/python2.7/dist-packages/HTSeq-0.6.1p1-py2.7-linux-x86_64.egg/HTSeq/scripts/count.py
-WORKDIR ${HOME}/bin
+WORKDIR /opt/
+RUN pip install --upgrade pip
+RUN pip install cython pysam virtualenv && \
+    wget https://files.pythonhosted.org/packages/3c/6e/f8dc3500933e036993645c3f854c4351c9028b180c6dcececde944022992/HTSeq-0.6.1p1.tar.gz && \
+    tar -xzf HTSeq-0.6.1p1.tar.gz && \
+    cd HTSeq-0.6.1p1 && \
+    python setup.py build install && \
+    rm /opt/HTSeq-0.6.1p1.tar.gz && \
+    sed -i 's/read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq )/read_seq = HTSeq.pair_SAM_alignments_with_buffer( read_seq, max_buffer_size=100000000 )/' /usr/local/lib/python2.7/dist-packages/HTSeq-0.6.1p1-py2.7-linux-x86_64.egg/HTSeq/scripts/count.py
 
-#download SAMTOOLS
-USER ubuntu
-RUN wget http://sourceforge.net/projects/samtools/files/samtools/1.1/samtools-1.1.tar.bz2 && tar xf samtools-1.1.tar.bz2 && mv samtools-1.1 samtools
-WORKDIR ${HOME}/bin/samtools/
-RUN make
-WORKDIR ${HOME}
+WORKDIR /opt
 
-ENV PATH ${PATH}:${HOME}/bin/samtools/
-USER root
+#add tools
+WORKDIR /opt
+RUN mkdir -p htseq-tools/htseq_tools
+ADD setup.py htseq-tools/
+ADD htseq_tools/ htseq-tools/htseq_tools/
+RUN cd htseq-tools && \
+    virtualenv venv && \
+    venv/bin/pip install .
 
-RUN pip install s3cmd --user
-WORKDIR ${HOME}
-ADD htseq-tool ${HOME}/bin/htseq-tool/
-ADD setup.* ${HOME}/bin/htseq-tool/
-ADD requirements.txt ${HOME}/bin/htseq-tool/
-ADD expression_normalization ${HOME}/bin/htseq-tool
-
-ENV rna_seq 0.18
-
-RUN pip install --user virtualenvwrapper \
-    && /bin/bash -c "source ${HOME}/.local/bin/virtualenvwrapper.sh \
-    && mkvirtualenv --python=/usr/bin/python2 p2 \
-    && echo source ${HOME}/.local/bin/virtualenvwrapper.sh >>${HOME}/.bashrc \
-    && echo source ${HOME}/.virtualenvs/p2/bin/activate >> ${HOME}/.bashrc \
-    && source ~/.virtualenvs/p2/bin/activate \
-    && cd ~/bin/htseq-tool \
-    && pip install -r ./requirements.txt"
-
-RUN chown -R ubuntu:ubuntu ${HOME}/bin/htseq-tool
-
-USER ubuntu
-WORKDIR ${HOME}
-
+WORKDIR /opt
