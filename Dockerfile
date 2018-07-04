@@ -56,6 +56,7 @@ ADD setup.py htseq-tools/
 ADD htseq_tools/ htseq-tools/htseq_tools/
 RUN cd htseq-tools && \
     virtualenv venv && \
+    venv/bin/pip --upgrade setuptools && \
     venv/bin/pip install .
 
 WORKDIR /opt
