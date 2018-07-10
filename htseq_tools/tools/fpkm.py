@@ -53,10 +53,18 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, pc_genes, gli
     """
     calculates the FPKM and FPKM-UQ
     """
+    if len(all_gene_length) != len(all_read_count):
+        msg = "Unequal length and counts of genes"
+        logger.error(msg)
+        raise Exception(msg)
+
     pc_reads = np.array([all_read_count[i] for i in list(pc_genes)])
     upper_quantile = np.percentile(pc_reads, 75)
-    if upper_quantile == 0.0:
-        logger.warning('Upper quantile is 0!')
+    if upper_quantile == 0:
+        msg = 'Upper quantile is 0!'
+        logger.error(msg)
+        raise ValueError(msg)
+
     logger.info("Upper quantile: {0}".format(upper_quantile))
 
     # Outputs
@@ -71,6 +79,10 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, pc_genes, gli
             if gene in all_gene_length:
                 C = all_read_count[gene] 
                 L = all_gene_length[gene]
+                if L == 0:
+                    msg = "The length of gene {0} is zero.".format(gene)
+                    logger.error(msg)
+                    raise ValueError(msg)
 
                 fpkm = (C * pow(10.0, 9)) / (pc_frag_count * L)
                 ofpkm.write('{0}\t{1:.4f}\n'.format(gene, fpkm))
