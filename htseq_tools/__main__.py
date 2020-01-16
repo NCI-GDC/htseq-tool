@@ -1,3 +1,7 @@
+"""Main entrypoint for the htseq-tools package.
+
+@author: Kyle Hernandez <kmhernan@uchicago.edu>
+"""
 import argparse
 import logging
 import gzip
