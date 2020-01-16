@@ -3,6 +3,8 @@ file. Our implementation uses only the protein coding genes
 for upper quantile and FPKM denominator.
 
 @author: Kyle Hernandez <kmhernan@uchicago.edu>
+
+Refactoring Stuti Agrawal's work.
 """
 import numpy as np
 
@@ -10,7 +12,14 @@ from htseq_tools.utils import get_logger, get_open_function
 
 
 def load_protein_coding_ids(fil):
-    """Extract the protein coding genes from the length TSV"""
+    """
+    Extract the protein coding genes from the length TSV.
+
+    :param fil: path to the gene lengths TSV
+    :returns: protein coding counts
+    :returns: set of protein coding gene IDs
+    :returns: dictionary of gene IDs and lengths
+    """
     count = 0
     gene_length = dict()
     protein_coding = list()
@@ -35,6 +44,12 @@ def load_protein_coding_ids(fil):
 def get_protein_coding_read_count(pcgenes, count_file):
     """
     Extract the counts of fragments mapped to protein coding genes.
+
+    :param pcgenes: set of protein coding gene IDs
+    :param count_file: HTSeq count file
+    :returns: number of fragments on protein coding genes
+    :returns: dictionary of gene ids and counts
+    :returns: list of found genes in count_file
     """
 
     ofunc = get_open_function(count_file)
@@ -59,6 +74,14 @@ def calculate_fpkm(all_read_count, pc_frag_count, all_gene_length, pc_genes,
                    glist, out_prefix, logger):
     """
     calculates the FPKM and FPKM-UQ
+
+    :param all_read_count: dictionary of gene IDs and counts
+    :param pc_frag_count: total number of protein coding fragments found
+    :param all_gene_length: total gene length
+    :param pc_genes: set of protein coding gene IDs
+    :param glist: genes found in htseq count file
+    :param out_prefix: prefix for output file
+    :param logger: `logging.Logger` instance
     """
     if len(all_gene_length) != len(all_read_count):
         msg = "Unequal length and counts of genes"
