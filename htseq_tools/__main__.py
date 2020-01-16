@@ -19,6 +19,7 @@ def load_args():
     parser = argparse.ArgumentParser(description='htseq tools')
 
     sp = parser.add_subparsers(description='Select a tool', dest='choice')
+    sp.required = True
 
     # Get Gene Lengths
     glen = sp.add_parser("gene_lengths",

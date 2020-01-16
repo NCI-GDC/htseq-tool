@@ -11,7 +11,7 @@ setuptools.setup(
     packages = setuptools.find_packages(),
     entry_points = {
         'console_scripts': [
-            'htseq-tools = htseq_tools.__main__:main' 
+            'htseq-tools = htseq_tools.__main__:main'
         ]
     },
     install_requires = [
