@@ -1,5 +1,5 @@
 #!/bin/bash
-# Only relevant for building the imagine within the GDC system
+# Only relevant for building the image within the GDC system
 
 docker_build () {
     command docker build \
