@@ -26,10 +26,8 @@ def extract_gene_data(info):
         elif i.startswith('gene_type'):
             gene_type = i.split(" ", 1)[1].replace('"', '')
 
-    if not gene_id:
-        raise RuntimeException('No gene_id found {0}'.format(info))
-    if not gene_type:
-        raise RuntimeException('No gene_type found {0}'.format(info))
+    assert gene_id is not None, 'No gene_id found {0}'.format(info)
+    assert gene_type is not None, 'No gene_type found {0}'.format(info)
     return gene_id, gene_type
 
 
