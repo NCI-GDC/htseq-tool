@@ -1,0 +1,11 @@
+##description: test 
+chr1	HAVANA	gene	11869	14409	.	+	.	gene_id "FAKE.1"; gene_type "pseudogene"; 
+chr1	HAVANA	transcript	11869	14409	.	+	.	gene_id "FAKE.1"; transcript_id "TFAKE.1"; gene_type "pseudogene"; 
+chr1	HAVANA	exon	11869	12227	.	+	.	gene_id "FAKE.1"; transcript_id "TFAKE.1"; gene_type "pseudogene"; 
+chr1	HAVANA	exon	12613	12721	.	+	.	gene_id "FAKE.1"; transcript_id "TFAKE.1"; gene_type "pseudogene"; 
+chr1	HAVANA	transcript	12010	13670	.	+	.	gene_id "FAKE.1"; transcript_id "TFAKE.2"; gene_type "pseudogene"; 
+chr1	HAVANA	exon	12010	12057	.	+	.	gene_id "FAKE.1"; transcript_id "TFAKE.2"; gene_type "pseudogene"; 
+chr1	HAVANA	exon	12179	12227	.	+	.	gene_id "FAKE.1"; transcript_id "TFAKE.2"; gene_type "pseudogene"; 
+chr1	HAVANA	gene	14404	29570	.	-	.	gene_id "FAKE.2"; gene_type "protein_coding"; 
+chr1	HAVANA	transcript	14404	29570	.	-	.	gene_id "FAKE.2"; transcript_id "TFAKE.3"; gene_type "protein_coding"; 
+chr1	HAVANA	exon	29534	29570	.	-	.	gene_id "FAKE.2"; transcript_id "TFAKE.3"; gene_type "protein_coding"; 
