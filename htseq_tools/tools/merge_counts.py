@@ -26,11 +26,12 @@ def merge_files(input_files, output_path, logger):
             for fil in input_files:
                 logger.info("Processing {0}".format(fil))
                 rfunc = get_open_function(fil)
-                for line in rfunc(fil, 'rt'):
-                    gid, counts = line.rstrip('\r\n').split('\t')
-                    if gid not in dic:
-                        dic[gid] = 0
-                    dic[gid] += int(counts)
+                with rfunc(fil, 'rt') as fh:
+                    for line in fh:
+                        gid, counts = line.rstrip('\r\n').split('\t')
+                        if gid not in dic:
+                            dic[gid] = 0
+                        dic[gid] += int(counts)
 
             # Write
             for key in dic:
@@ -41,8 +42,9 @@ def merge_files(input_files, output_path, logger):
             logger.info("Single input provided, no changes will be made")
             fil = input_files[0]
             rfunc = get_open_function(fil)
-            for line in rfunc(fil, 'rt'):
-                o.write(line)
+            with rfunc(fil, 'rt') as fh:
+                for line in fh:
+                    o.write(line)
 
 
 def main(args):
