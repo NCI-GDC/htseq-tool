@@ -1,0 +1,3 @@
+FAKE.1	20
+FAKE.2	100
+__something	400
