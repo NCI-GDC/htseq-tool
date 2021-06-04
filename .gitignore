@@ -24,6 +24,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+_version.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -87,16 +88,23 @@ celerybeat-schedule
 venv/
 ENV/
 
+# direnv
+.envrc
+.direnv/
+
 # Spyder project settings
 .spyderproject
 .spyproject
 
 # Rope project settings
 .ropeproject
-.idea
 
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
+
+# VSCode
+.vscode/
+test-reports/
