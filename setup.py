@@ -15,7 +15,7 @@ setuptools.setup(
         ]
     },
     install_requires = [
-      'numpy==1.14.5'
+      'numpy==1.22.0'
     ]
 )
 
